@@ -11,6 +11,10 @@
 
 <sub>TabDDPM · MoE–Mamba · heteroscedastic prediction · constrained inverse optimization</sub>
 
+<p align="center">
+  <a href="#research-overview">Overview</a> · <a href="#architecture">Architecture</a> · <a href="#published-results">Results</a> · <a href="#installation">Installation</a> · <a href="docs/README.md">Documentation</a>
+</p>
+
 </div>
 
 RiceMambaOpt links cultivar-aware quality prediction with process-feasibility-constrained inverse design, balancing starch digestibility, sensory quality, and executable milling conditions.
@@ -264,6 +268,28 @@ The current experiments cover a finite set of cultivars, milling conditions, qua
 The nine targets do not capture every nutritional, sensory, economic, or manufacturing consideration. Objective weights and feasibility thresholds must be chosen for the intended application. The optimizer should not be used beyond the declared process domain, and high-uncertainty or boundary solutions should be confirmed experimentally before operational use.
 
 The public repository provides validated process records, multi-target metrics, named constraints, inverse-objective utilities, figures, result tables, and the planned codebase structure. It does not include the complete trained TabDDPM/MoE–Mamba implementation, checkpoints, or the underlying experimental dataset.
+
+## Installation
+
+The public utility package requires Python 3.10 or later and has no runtime dependencies.
+
+```bash
+git clone https://github.com/ZhWenPrism/RiceMambaOpt.git
+cd RiceMambaOpt
+python -m pip install -e .
+python -m unittest discover -s tests -v
+```
+
+### Package reference
+
+| Component | Entry point |
+|:---|:---|
+| Process bounds, milling observations, and inverse-design requests | [Data records](ricemambaopt/datasets/schema.py) |
+| Bound checks, linear constraints, and constraint residuals | [Constraint utilities](ricemambaopt/optimization/constraints/core.py) |
+| Normalized inverse-design objectives | [Objective utilities](ricemambaopt/optimization/objectives/core.py) |
+| Multi-target regression metrics | [Evaluation metrics](ricemambaopt/evaluation/metrics.py) |
+
+[Data interface](docs/DATA_INTERFACE.md) · [Metric definitions](docs/METRICS.md) · [Result tables](results/)
 
 ## Codebase blueprint
 
