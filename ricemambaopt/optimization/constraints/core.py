@@ -28,6 +28,8 @@ class LinearConstraint:
             raise ValueError("constraint coefficients and limit must be finite")
 
     def violation(self, time_seconds: float, speed_rpm: float) -> float:
+        if not isfinite(time_seconds) or not isfinite(speed_rpm):
+            raise ValueError("process settings must be finite")
         value = self.time_coefficient * time_seconds + self.speed_coefficient * speed_rpm
         return max(0.0, value - self.limit) if self.relation == "<=" else max(0.0, self.limit - value)
 
@@ -69,6 +71,8 @@ class ConstraintSet:
         return ConstraintResult(not active, active)
 
     def project_to_bounds(self, time_seconds: float, speed_rpm: float) -> tuple[float, float]:
+        if not isfinite(time_seconds) or not isfinite(speed_rpm):
+            raise ValueError("process settings must be finite")
         return (
             min(max(time_seconds, self.bounds.time_seconds[0]), self.bounds.time_seconds[1]),
             min(max(speed_rpm, self.bounds.speed_rpm[0]), self.bounds.speed_rpm[1]),
