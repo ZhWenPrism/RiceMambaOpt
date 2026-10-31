@@ -27,10 +27,12 @@ class ProcessBounds:
     speed_rpm: tuple[float, float]
 
     def __post_init__(self) -> None:
-        for name, bounds in (("time_seconds", self.time_seconds), ("speed_rpm", self.speed_rpm)):
+        for name in ("time_seconds", "speed_rpm"):
+            bounds = tuple(getattr(self, name))
             low, high = bounds
             if not all(isfinite(value) for value in bounds) or low < 0 or low >= high:
                 raise ValueError(f"{name} bounds must satisfy 0 <= low < high")
+            object.__setattr__(self, name, bounds)
 
     def contains(self, time_seconds: float, speed_rpm: float) -> bool:
         return (
