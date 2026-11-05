@@ -54,6 +54,14 @@ class ConstraintSet:
     bounds: ProcessBounds
     linear: tuple[LinearConstraint, ...] = ()
 
+    def __post_init__(self) -> None:
+        linear = tuple(self.linear)
+        names = [constraint.name for constraint in linear]
+        reserved = {"time_lower", "time_upper", "speed_lower", "speed_upper"}
+        if len(set(names)) != len(names) or reserved.intersection(names):
+            raise ValueError("linear constraint names must be unique and distinct from bound names")
+        object.__setattr__(self, "linear", linear)
+
     def evaluate(self, time_seconds: float, speed_rpm: float) -> ConstraintResult:
         if not isfinite(time_seconds) or not isfinite(speed_rpm):
             raise ValueError("process settings must be finite")
@@ -64,8 +72,6 @@ class ConstraintSet:
             "speed_upper": max(0.0, speed_rpm - self.bounds.speed_rpm[1]),
         }
         for constraint in self.linear:
-            if constraint.name in violations:
-                raise ValueError(f"duplicate constraint name: {constraint.name}")
             violations[constraint.name] = constraint.violation(time_seconds, speed_rpm)
         active = {name: value for name, value in violations.items() if value > 0}
         return ConstraintResult(not active, active)
