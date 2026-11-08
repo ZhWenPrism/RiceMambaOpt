@@ -13,7 +13,7 @@ def _paired(y_true: Iterable[float], y_pred: Iterable[float]) -> tuple[tuple[flo
         raise ValueError("inputs must be non-empty and aligned")
     if any(not isfinite(value) for value in (*left, *right)):
         raise ValueError("inputs must contain finite values")
-    return left, right
+    return tuple(map(float, left)), tuple(map(float, right))
 
 
 @dataclass(frozen=True, slots=True)
