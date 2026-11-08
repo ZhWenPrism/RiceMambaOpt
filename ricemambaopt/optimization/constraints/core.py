@@ -30,8 +30,12 @@ class LinearConstraint:
     def violation(self, time_seconds: float, speed_rpm: float) -> float:
         if not isfinite(time_seconds) or not isfinite(speed_rpm):
             raise ValueError("process settings must be finite")
-        value = self.time_coefficient * time_seconds + self.speed_coefficient * speed_rpm
-        return max(0.0, value - self.limit) if self.relation == "<=" else max(0.0, self.limit - value)
+        value = float(self.time_coefficient) * float(time_seconds) + float(self.speed_coefficient) * float(speed_rpm)
+        limit = float(self.limit)
+        slack = value - limit if self.relation == "<=" else limit - value
+        if not isfinite(slack):
+            raise ValueError("constraint slack must be finite")
+        return max(0.0, slack)
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,11 +69,14 @@ class ConstraintSet:
     def evaluate(self, time_seconds: float, speed_rpm: float) -> ConstraintResult:
         if not isfinite(time_seconds) or not isfinite(speed_rpm):
             raise ValueError("process settings must be finite")
+        time_seconds, speed_rpm = float(time_seconds), float(speed_rpm)
+        time_lower, time_upper = map(float, self.bounds.time_seconds)
+        speed_lower, speed_upper = map(float, self.bounds.speed_rpm)
         violations = {
-            "time_lower": max(0.0, self.bounds.time_seconds[0] - time_seconds),
-            "time_upper": max(0.0, time_seconds - self.bounds.time_seconds[1]),
-            "speed_lower": max(0.0, self.bounds.speed_rpm[0] - speed_rpm),
-            "speed_upper": max(0.0, speed_rpm - self.bounds.speed_rpm[1]),
+            "time_lower": max(0.0, time_lower - time_seconds),
+            "time_upper": max(0.0, time_seconds - time_upper),
+            "speed_lower": max(0.0, speed_lower - speed_rpm),
+            "speed_upper": max(0.0, speed_rpm - speed_upper),
         }
         for constraint in self.linear:
             violations[constraint.name] = constraint.violation(time_seconds, speed_rpm)
