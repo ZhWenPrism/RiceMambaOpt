@@ -23,7 +23,8 @@ def weighted_normalized_squared_error(
         values = (predicted[name], target[name], scales[name], resolved_weights[name])
         if any(not isfinite(value) for value in values) or scales[name] <= 0 or resolved_weights[name] <= 0:
             raise ValueError("values must be finite; scales and weights must be positive")
-        residual = (predicted[name] - target[name]) / scales[name]
-        numerator += resolved_weights[name] * residual * residual
-        denominator += resolved_weights[name]
+        prediction, expected, scale, weight = map(float, values)
+        residual = (prediction - expected) / scale
+        numerator += weight * residual * residual
+        denominator += weight
     return numerator / denominator
