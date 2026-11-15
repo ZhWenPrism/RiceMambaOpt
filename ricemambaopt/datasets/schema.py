@@ -55,6 +55,11 @@ class MillingObservation:
         for name in ("sample_id", "batch_id", "cultivar"):
             if not getattr(self, name).strip():
                 raise ValueError(f"{name} must not be empty")
+        try:
+            role = StudyRole(self.role)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("role must be development, holdout, or prospective") from exc
+        object.__setattr__(self, "role", role)
         if not isfinite(self.time_seconds) or self.time_seconds < 0:
             raise ValueError("time_seconds must be finite and non-negative")
         if not isfinite(self.speed_rpm) or self.speed_rpm < 0:
