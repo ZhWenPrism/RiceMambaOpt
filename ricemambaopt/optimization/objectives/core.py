@@ -18,12 +18,17 @@ def weighted_normalized_squared_error(
     resolved_weights = dict(weights) if weights is not None else {name: 1.0 for name in keys}
     if set(resolved_weights) != keys:
         raise ValueError("weights must match target keys")
+    for name in keys:
+        if not isfinite(resolved_weights[name]) or resolved_weights[name] <= 0:
+            raise ValueError("weights must be finite and positive")
+    weight_scale = max(map(float, resolved_weights.values()))
     numerator, denominator = 0.0, 0.0
     for name in sorted(keys):
         values = (predicted[name], target[name], scales[name], resolved_weights[name])
         if any(not isfinite(value) for value in values) or scales[name] <= 0 or resolved_weights[name] <= 0:
             raise ValueError("values must be finite; scales and weights must be positive")
         prediction, expected, scale, weight = map(float, values)
+        weight /= weight_scale
         residual = (prediction - expected) / scale
         numerator += weight * residual * residual
         denominator += weight

@@ -44,6 +44,9 @@ def per_target_metrics(
 ) -> Mapping[str, RegressionMetrics]:
     if set(y_true) != set(y_pred) or not y_true:
         raise ValueError("true and predicted target sets must match and be non-empty")
+    lengths = {len(values) for values in y_true.values()}
+    if len(lengths) != 1:
+        raise ValueError("all targets must contain the same observations")
     return {name: regression_metrics(y_true[name], y_pred[name]) for name in sorted(y_true)}
 
 
@@ -54,6 +57,9 @@ def joint_normalized_rmse(
 ) -> float:
     if set(y_true) != set(y_pred) or set(y_true) != set(scales) or not y_true:
         raise ValueError("targets and scales must have identical non-empty keys")
+    lengths = {len(values) for values in y_true.values()}
+    if len(lengths) != 1:
+        raise ValueError("all targets must contain the same observations")
     normalized = []
     for name in sorted(y_true):
         scale = scales[name]
