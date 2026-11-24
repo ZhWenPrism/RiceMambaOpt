@@ -62,7 +62,7 @@ def joint_normalized_rmse(
         raise ValueError("all targets must contain the same observations")
     normalized = []
     for name in sorted(y_true):
-        scale = scales[name]
+        scale = float(scales[name])
         if not isfinite(scale) or scale <= 0:
             raise ValueError("normalization scales must be finite and positive")
         normalized.append(regression_metrics(y_true[name], y_pred[name]).rmse / scale)
